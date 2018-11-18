@@ -16,6 +16,7 @@
 package mk.com.pazicajkan.pazicajkan.utilities;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.util.Log;
 
@@ -38,6 +39,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+import mk.com.pazicajkan.pazicajkan.MainActivity;
 import mk.com.pazicajkan.pazicajkan.R;
 
 /**
@@ -46,6 +48,7 @@ import mk.com.pazicajkan.pazicajkan.R;
 public class NetworkUtils {
 
     String API_BASE_URL = "";
+    public static final String TAG = NetworkUtils.class.getSimpleName();
     final static String PARAM_QUERY = "q";
 
     /*
@@ -107,15 +110,18 @@ public class NetworkUtils {
         }
     }
 
-    public void post(String url, Map map, Context context) {
+    public void post(String url, Map map, Context context, final MainActivity activity) {
         RequestQueue requestQueue = Volley.newRequestQueue(context);
 
-        Log.e("HERE", "WE GOT SOMETHING");
+        SharedPreferences sharedPref = activity.getPreferences(Context.MODE_PRIVATE);
+
         try {
             JSONObject jsonBody = new JSONObject();
 
             jsonBody.put("email", map.get("email"));
             jsonBody.put("name", map.get("name"));
+            jsonBody.put("platform_id", map.get("platform_id"));
+            jsonBody.put("platform", map.get("platform"));
 
             JsonObjectRequest stringRequest = new JsonObjectRequest(
                     Request.Method.POST,
@@ -124,13 +130,23 @@ public class NetworkUtils {
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
-                            Log.e("NEW", response.toString());
+                            try {
+                                String success = response.getString("success");
+                                Integer user_id = response.getInt("user_id");
+
+                                if (success == "true") {
+                                    activity.openLocationInMap();
+                                    activity.setUserId(user_id);
+                                }
+                            } catch (Exception e) {
+                                //handle exceptions
+                            }
                         }
                     },
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            Log.e("NEW", error.toString());
+                           // Log.e("NEW", error.toString());
                         }
                     }
             );
