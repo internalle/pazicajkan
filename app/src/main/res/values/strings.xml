@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Пази Цајкан</string>
     <string name="facebook_app_id">114337089500170</string>
+    <string name="api_base_url">http://192.168.10.10/api/</string>
 </resources>
